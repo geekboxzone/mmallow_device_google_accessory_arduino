@@ -8,16 +8,56 @@ static byte vbusState;
 
 /* Functions    */
 
+#define INT		PE6
+#define INT_PORT	PORTE
+#define INT_DDR		DDRE
+#define INT_PIN		PINE
+
+#define RST		PJ2
+#define RST_PORT	PORTJ
+#define RST_DDR		DDRJ
+#define RST_PIN		PINJ
+
+#define GPX		PJ3
+#define GPX_PORT	PORTJ
+#define GPX_DDR		DDRJ
+#define GPX_PIN		PINJ
+
+
+void MAX3421E::setRST(uint8_t val)
+{
+	if (val == LOW)
+		RST_PORT &= ~_BV(RST);
+	else
+		RST_PORT |= _BV(RST);
+}
+
+uint8_t MAX3421E::readINT(void)
+{
+	return INT_PIN & _BV(INT) ? HIGH : LOW;
+}
+
+uint8_t MAX3421E::readGPX(void)
+{
+	// return GPX_PIN & _BV(GPX) ? HIGH : LOW;
+	return LOW;
+}
+
+
+void MAX3421E::pinInit(void)
+{
+	INT_DDR &= ~_BV(INT);
+	RST_DDR |= _BV(RST);
+	digitalWrite(MAX_SS,HIGH);   
+	setRST(HIGH);
+}
+
+
 /* Constructor */
 MAX3421E::MAX3421E()
 {
     spi_init();  
-    pinMode( MAX_INT, INPUT);
-    pinMode( MAX_GPX, INPUT );
-    pinMode( MAX_SS, OUTPUT );
-    digitalWrite(MAX_SS,HIGH);   
-    pinMode( MAX_RESET, OUTPUT );
-    digitalWrite( MAX_RESET, HIGH );  //release MAX3421E from reset
+	pinInit();
 }
 
 byte MAX3421E::getVbusState( void )
@@ -225,11 +265,11 @@ byte MAX3421E::Task( void )
  byte pinvalue;
     //Serial.print("Vbus state: ");
     //Serial.println( vbusState, HEX );
-    pinvalue = digitalRead( MAX_INT );    
-    if( pinvalue  == LOW ) {
+ pinvalue = readINT();
+ if( pinvalue  == LOW ) {
         rcode = IntHandler();
     }
-    pinvalue = digitalRead( MAX_GPX );
+    pinvalue = readGPX();
     if( pinvalue == LOW ) {
         GpxHandler();
     }

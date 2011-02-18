@@ -29,6 +29,11 @@ class MAX3421E /* : public SPI */ {
         byte GpxHandler();
         byte Task();
     private:
+	static void pinInit(void);
+	static void setRST(uint8_t val);
+	static uint8_t readINT(void);
+	static uint8_t readGPX(void);
+
       static void spi_init() {
         uint8_t tmp;
         // initialize SPI pins
@@ -36,7 +41,6 @@ class MAX3421E /* : public SPI */ {
         pinMode(MOSI_PIN, OUTPUT);
         pinMode(MISO_PIN, INPUT);
         pinMode(SS_PIN, OUTPUT);
-        digitalWrite( SS_PIN, HIGH ); 
         /* mode 00 (CPOL=0, CPHA=0) master, fclk/2. Mode 11 (CPOL=11, CPHA=11) is also supported by MAX3421E */
         SPCR = 0x50;
         SPSR = 0x01;

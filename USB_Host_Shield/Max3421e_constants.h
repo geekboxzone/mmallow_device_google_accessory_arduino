@@ -19,7 +19,7 @@
   #define SS_PIN    10
 #endif
 
-#define MAX_SS    10
+#define MAX_SS    53
 #define MAX_INT   9
 #define MAX_GPX   8
 #define MAX_RESET 7
