@@ -224,8 +224,8 @@ bool AndroidAccessory::isConnected(void)
 
         err = usb.getDevDescr(1, 0, 0x12, (char *) devDesc);
         if (err) {
-            Serial.print("\nDevice descriptor cannot be retrieved. Program Halted\n");
-            while(1);
+            Serial.print("\nDevice descriptor cannot be retrieved. Trying again\n");
+            return false;
         }
 
         if (isAccessoryDevice(devDesc)) {
@@ -237,6 +237,8 @@ bool AndroidAccessory::isConnected(void)
             switchDevice(1);
         }
     } else if (usb.getUsbTaskState() == USB_DETACHED_SUBSTATE_WAIT_FOR_DEVICE) {
+        if (connected)
+            Serial.println("disconnect");
         connected = false;
     }
 
