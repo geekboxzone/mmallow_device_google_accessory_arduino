@@ -19,20 +19,20 @@
 #include <Usb.h>
 #include <AndroidAccessory.h>
 
-#define USB_ACCESSORY_VENDOR_ID 0x18D1
-#define USB_ACCESSORY_PRODUCT_ID 0x2D00
+#define USB_ACCESSORY_VENDOR_ID         0x18D1
+#define USB_ACCESSORY_PRODUCT_ID        0x2D00
 
-#define USB_ACCESSORY_ADB_PRODUCT_ID 0x2D01
-#define ACCESSORY_STRING_MANUFACTURER 0
-#define ACCESSORY_STRING_MODEL 1
-#define ACCESSORY_STRING_DESCRIPTION 2
-#define ACCESSORY_STRING_VERSION 3
-#define ACCESSORY_STRING_URI 4
-#define ACCESSORY_STRING_SERIAL 5
+#define USB_ACCESSORY_ADB_PRODUCT_ID    0x2D01
+#define ACCESSORY_STRING_MANUFACTURER   0
+#define ACCESSORY_STRING_MODEL          1
+#define ACCESSORY_STRING_DESCRIPTION    2
+#define ACCESSORY_STRING_VERSION        3
+#define ACCESSORY_STRING_URI            4
+#define ACCESSORY_STRING_SERIAL         5
 
-#define ACCESSORY_GET_PROTOCOL 51
-#define ACCESSORY_SEND_STRING 52
-#define ACCESSORY_START 53
+#define ACCESSORY_GET_PROTOCOL          51
+#define ACCESSORY_SEND_STRING           52
+#define ACCESSORY_START                 53
 
 
 AndroidAccessory::AndroidAccessory(const char *manufacturer,
@@ -60,15 +60,22 @@ void AndroidAccessory::powerOn(void)
 int AndroidAccessory::getProtocol(byte addr)
 {
     uint16_t protocol = -1;
-    usb.ctrlReq(addr, 0, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_VENDOR | USB_SETUP_RECIPIENT_DEVICE,
+    usb.ctrlReq(addr, 0,
+                USB_SETUP_DEVICE_TO_HOST |
+                USB_SETUP_TYPE_VENDOR |
+                USB_SETUP_RECIPIENT_DEVICE,
                 ACCESSORY_GET_PROTOCOL, 0, 0, 0, 2, (char *)&protocol);
     return protocol;
 }
 
 void AndroidAccessory::sendString(byte addr, int index, const char *str)
 {
-    usb.ctrlReq(addr, 0, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_VENDOR | USB_SETUP_RECIPIENT_DEVICE,
-                ACCESSORY_SEND_STRING, 0, 0, index, strlen(str) + 1, (char *)str);
+    usb.ctrlReq(addr, 0,
+                USB_SETUP_HOST_TO_DEVICE |
+                USB_SETUP_TYPE_VENDOR |
+                USB_SETUP_RECIPIENT_DEVICE,
+                ACCESSORY_SEND_STRING, 0, 0, index,
+                strlen(str) + 1, (char *)str);
 }
 
 
@@ -90,7 +97,10 @@ bool AndroidAccessory::switchDevice(byte addr)
     sendString(addr, ACCESSORY_STRING_URI, uri);
     sendString(addr, ACCESSORY_STRING_SERIAL, serial);
 
-    usb.ctrlReq(addr, 0, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_VENDOR | USB_SETUP_RECIPIENT_DEVICE,
+    usb.ctrlReq(addr, 0,
+                USB_SETUP_HOST_TO_DEVICE |
+                USB_SETUP_TYPE_VENDOR |
+                USB_SETUP_RECIPIENT_DEVICE,
                 ACCESSORY_START, 0, 0, 0, 0, NULL);
 
     while (usb.getUsbTaskState() != USB_DETACHED_SUBSTATE_WAIT_FOR_DEVICE) {
@@ -101,6 +111,7 @@ bool AndroidAccessory::switchDevice(byte addr)
     return true;
 }
 
+// Finds the first bulk IN and bulk OUT endpoints
 bool AndroidAccessory::findEndpoints(byte addr, EP_RECORD *inEp, EP_RECORD *outEp)
 {
     int len;
@@ -195,9 +206,7 @@ bool AndroidAccessory::configureAndroid(void)
     in = inEp.epAddr;
     out = outEp.epAddr;
 
-    Serial.print("inEp: ");
     Serial.println(inEp.epAddr, HEX);
-    Serial.print("outEp: ");
     Serial.println(outEp.epAddr, HEX);
 
     epRecord[0] = *(usb.getDevTableEntry(0,0));
@@ -226,7 +235,7 @@ bool AndroidAccessory::isConnected(void)
         usb.getUsbTaskState() >= USB_STATE_CONFIGURING &&
         usb.getUsbTaskState() != USB_STATE_RUNNING) {
         Serial.print("\nDevice addressed... ");
-        Serial.print("Requesting device descriptor.");
+        Serial.print("Requesting device descriptor.\n");
 
         err = usb.getDevDescr(1, 0, 0x12, (char *) devDesc);
         if (err) {
@@ -244,7 +253,7 @@ bool AndroidAccessory::isConnected(void)
         }
     } else if (usb.getUsbTaskState() == USB_DETACHED_SUBSTATE_WAIT_FOR_DEVICE) {
         if (connected)
-            Serial.println("disconnect");
+            Serial.println("disconnect\n");
         connected = false;
     }
 

@@ -65,5 +65,4 @@ public:
     int write(void *buff, int len);
 };
 
-
 #endif /* __AndroidAccessory_h__ */
