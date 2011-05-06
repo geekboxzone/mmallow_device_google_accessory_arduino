@@ -92,6 +92,12 @@ bool AndroidAccessory::switchDevice(byte addr)
 
     usb.ctrlReq(addr, 0, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_VENDOR | USB_SETUP_RECIPIENT_DEVICE,
                 ACCESSORY_START, 0, 0, 0, 0, NULL);
+
+    while (usb.getUsbTaskState() != USB_DETACHED_SUBSTATE_WAIT_FOR_DEVICE) {
+        max.Task();
+        usb.Task();
+    }
+
     return true;
 }
 
